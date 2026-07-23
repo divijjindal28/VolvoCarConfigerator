@@ -16,6 +16,10 @@ public class MRUKLabelDebugger : MonoBehaviour
     private NavMeshSurface navMeshSurface;
     public GameObject plane;
     private GameObject planeGameObject;
+
+
+    public GameObject carGO;
+    public GameObject carGORefPoint;
     void Start()
     {
         Debug.Log("MRUKLabelDebugger Start");
@@ -106,7 +110,24 @@ public class MRUKLabelDebugger : MonoBehaviour
     void CreatePlane(GameObject parent)
     {
         planeGameObject = Instantiate(plane,parent.transform.position,Quaternion.identity);
+        AlignCarToPlane();
         //planeGameObject.transform.SetParent(parent.transform);
+    }
+
+
+    private void AlignCarToPlane()
+    {
+        if (carGO == null || carGORefPoint == null || planeGameObject == null)
+            return;
+
+        // Calculate only the Y offset needed
+        float yOffset = planeGameObject.transform.position.y - carGORefPoint.transform.position.y;
+
+        // Move only the car's Y position
+        Vector3 newPosition = carGO.transform.position;
+        newPosition.y += yOffset;
+
+        carGO.transform.position = newPosition;
     }
 
     void BuildNavMesh()
