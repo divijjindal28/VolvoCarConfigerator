@@ -10,7 +10,7 @@ public class FaceUser : MonoBehaviour
     [SerializeField] private List<Transform> referencePoints = new List<Transform>();
 
     [Header("Movement")]
-    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private float moveSpeed = 2f;
 
     [Header("Rotation")]
     [SerializeField] private float rotationSpeed = 180f;
@@ -19,8 +19,10 @@ public class FaceUser : MonoBehaviour
     [SerializeField] private float positionThreshold = 0.005f;
     [SerializeField] private float rotationThreshold = 0.5f;
 
-    private static int currentReferenceIndex = 0;
+    [Header("Car Center")]
+    [SerializeField] private Transform carCenter;
 
+    private int currentReferenceIndex = 0;
     private Transform currentReference;
 
     private void OnEnable()
@@ -44,19 +46,7 @@ public class FaceUser : MonoBehaviour
             return;
 
         //--------------------------------------------------
-        // MOVE
-        //--------------------------------------------------
-
-        Vector3 offset = user.position - currentReference.position;
-        Vector3 targetPosition = transform.position + offset;
-
-        transform.position = Vector3.Lerp(
-            transform.position,
-            targetPosition,
-            moveSpeed * Time.deltaTime);
-
-        //--------------------------------------------------
-        // ROTATE
+        // ROTATE FIRST
         //--------------------------------------------------
 
         Vector3 currentForward = currentReference.forward;
@@ -81,20 +71,25 @@ public class FaceUser : MonoBehaviour
                 angle,
                 rotationSpeed * Time.deltaTime);
 
-            transform.RotateAround(
-                currentReference.position,
-                Vector3.up,
-                deltaAngle);
+            if (carCenter != null)
+            {
+                transform.RotateAround(
+                    carCenter.position,
+                    Vector3.up,
+                    deltaAngle);
+            }
+            else
+            {
+                transform.RotateAround(
+                    currentReference.position,
+                    Vector3.up,
+                    deltaAngle);
+            }
         }
 
         //--------------------------------------------------
-        // FINISHED?
+        // CHECK ROTATION
         //--------------------------------------------------
-
-        bool positionDone =
-            Vector3.Distance(
-                currentReference.position,
-                user.position) < positionThreshold;
 
         currentForward = currentReference.forward;
         currentForward.y = 0f;
@@ -109,8 +104,48 @@ public class FaceUser : MonoBehaviour
                 currentForward,
                 desiredForward) < rotationThreshold;
 
-        if (positionDone && rotationDone)
+        //--------------------------------------------------
+        // MOVE ONLY AFTER ROTATION IS COMPLETE
+        // (Ignore Y movement)
+        //--------------------------------------------------
+
+        if (rotationDone)
         {
+            Vector3 offset = user.position - currentReference.position;
+            offset.y = 0f;
+
+            Vector3 targetPosition = transform.position + offset;
+
+            transform.position = Vector3.MoveTowards(
+                transform.position,
+                targetPosition,
+                moveSpeed * Time.deltaTime);
+        }
+
+        //--------------------------------------------------
+        // FINISHED?
+        //--------------------------------------------------
+
+        Vector3 currentPos = currentReference.position;
+        currentPos.y = 0f;
+
+        Vector3 userPos = user.position;
+        userPos.y = 0f;
+
+        bool positionDone =
+            rotationDone &&
+            Vector3.Distance(
+                currentPos,
+                userPos) < positionThreshold;
+
+        if (positionDone)
+        {
+            // Final snap so the reference point is exactly on the user (XZ only)
+            Vector3 finalOffset = user.position - currentReference.position;
+            finalOffset.y = 0f;
+
+            transform.position += finalOffset;
+
             currentReferenceIndex++;
 
             if (currentReferenceIndex >= referencePoints.Count)

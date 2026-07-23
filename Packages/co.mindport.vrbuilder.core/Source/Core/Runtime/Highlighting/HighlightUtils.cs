@@ -36,15 +36,38 @@ namespace VRBuilder.Core.Highlighting
         /// <summary>
         /// Creates the default highlight shader which will be used.
         /// </summary>
+        //public static Shader GetDefaultHighlightShader()
+        //{
+        //    string shaderName = GraphicsSettings.currentRenderPipeline ? "Universal Render Pipeline/Lit" : "Standard";
+        //    Shader defaultShader = Shader.Find(shaderName);
+
+        //    if (defaultShader == null)
+        //    {
+        //        throw new NullReferenceException($"Failed to create a default material," +
+        //                                         $" shader \"{shaderName}\" was not found. Make sure the shader is included into the game build.");
+        //    }
+
+        //    return defaultShader;
+        //}
+
+
         public static Shader GetDefaultHighlightShader()
         {
-            string shaderName = GraphicsSettings.currentRenderPipeline ? "Universal Render Pipeline/Lit" : "Standard";
-            Shader defaultShader = Shader.Find(shaderName);
+            Shader defaultShader = Shader.Find("HDRP/Lit");
 
             if (defaultShader == null)
             {
-                throw new NullReferenceException($"Failed to create a default material," +
-                                                 $" shader \"{shaderName}\" was not found. Make sure the shader is included into the game build.");
+                defaultShader = Shader.Find("Universal Render Pipeline/Lit");
+            }
+
+            if (defaultShader == null)
+            {
+                defaultShader = Shader.Find("Standard");
+            }
+
+            if (defaultShader == null)
+            {
+                throw new NullReferenceException("Could not find a suitable highlight shader.");
             }
 
             return defaultShader;

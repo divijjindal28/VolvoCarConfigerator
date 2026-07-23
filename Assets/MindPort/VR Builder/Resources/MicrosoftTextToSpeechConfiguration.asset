@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e421603780a05b4e80406cb1feaa579, type: 3}
   m_Name: MicrosoftTextToSpeechConfiguration
   m_EditorClassIdentifier: VRBuilder.Core::VRBuilder.Core.TextToSpeech.Configuration.MicrosoftTextToSpeechConfiguration
-  voice: Male
+  voice: Female

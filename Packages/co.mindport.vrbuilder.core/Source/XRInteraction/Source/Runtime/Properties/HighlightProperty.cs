@@ -65,6 +65,8 @@ namespace VRBuilder.XRInteraction.Properties
         /// <inheritdoc/>
         protected override bool TryHighlight(Color highlightColor)
         {
+            Debug.Log("HighlightProperty : TryHighlight called");
+
             if (DefaultHighlighter == null)
             {
                 Initialize();
